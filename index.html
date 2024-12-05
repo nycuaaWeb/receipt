@@ -8,22 +8,62 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #f8f9fa;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
         }
         .receipt-form {
             max-width: 600px;
             margin: 50px auto;
-            padding: 20px;
+            padding: 30px;
             background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .btn-newcolor {
+            background: linear-gradient(45deg, #195f8d, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px;
+            transition: all 0.3s ease;
+        }
+        .btn-newcolor:hover {
+            background: linear-gradient(45deg, #1e425a, #195f8d);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(25, 95, 141, 0.3);
+        }
+        .form-control {
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid #dee2e6;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus {
+            box-shadow: 0 0 0 0.2rem rgba(25, 95, 141, 0.25);
+            border-color: #195f8d;
+        }
+        .warning-text {
+            color: #dc3545;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #dc3545;
+            border-radius: 8px;
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+        .title {
+            color: #195f8d;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="receipt-form">
-            <h2 class="text-center mb-4">國立陽明交通大學校友總會<br>2024跨世代交流餐會收據平台</h2>
+            <h3 class="title">國立陽明交通大學校友總會收據平台</h3>
             
             <div class="mb-3">
                 <label for="name" class="form-label">姓名</label>
@@ -31,12 +71,16 @@
             </div>
             
             <div class="mb-3">
-                <label for="email" class="form-label">電子郵件</label>
-                <input type="email" class="form-control" id="email" placeholder="請輸入電子郵件">
+                <label for="idLastFive" class="form-label">證號末五碼</label>
+                <input type="text" class="form-control" id="idLastFive" 
+                       placeholder="請輸入證號末五碼" 
+                       maxlength="5" 
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                <div class="form-text">請輸入您證號的最後5個數字</div>
             </div>
 
             <div class="d-grid gap-2">
-                <button class="btn btn-primary" onclick="searchReceipt()">查看收據</button>
+                <button class="btn btn-newcolor" onclick="searchReceipt()">取得收據</button>
             </div>
 
             <div id="result" class="mt-3"></div>
@@ -47,25 +91,38 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        function isValidEmail(email) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(email);
+        function validateIdLastFive(idLastFive) {
+            return /^\d{5}$/.test(idLastFive);
         }
 
         async function searchReceipt() {
             const name = document.getElementById('name').value.trim();
-            const email = document.getElementById('email').value.trim();
+            const idLastFive = document.getElementById('idLastFive').value.trim();
             const resultDiv = document.getElementById('result');
+            const idInput = document.getElementById('idLastFive');
+            
+            // 移除之前可能存在的錯誤狀態
+            idInput.classList.remove('is-invalid');
+            const oldFeedback = idInput.nextElementSibling;
+            if (oldFeedback && oldFeedback.classList.contains('invalid-feedback')) {
+                oldFeedback.remove();
+            }
             
             // 檢查必填欄位
-            if (!name || !email) {
+            if (!name || !idLastFive) {
                 resultDiv.innerHTML = '<div class="alert alert-danger">請填寫所有欄位</div>';
                 return;
             }
 
-            // 檢查電子郵件格式
-            if (!isValidEmail(email)) {
-                resultDiv.innerHTML = '<div class="alert alert-danger">請輸入有效的電子郵件地址</div>';
+            // 檢查證號末五碼格式
+            if (!validateIdLastFive(idLastFive)) {
+                idInput.classList.add('is-invalid');
+                const feedback = document.createElement('div');
+                feedback.className = 'invalid-feedback';
+                feedback.textContent = '請輸入完整的5位數字';
+                idInput.parentNode.appendChild(feedback);
+                
+                resultDiv.innerHTML = '<div class="alert alert-danger">請輸入正確的5位數字證��末五碼</div>';
                 return;
             }
 
@@ -74,27 +131,64 @@
             try {
                 const params = new URLSearchParams({
                     name: name,
-                    email: email
+                    idLastFive: idLastFive
                 });
 
-                const response = await fetch(`https://script.google.com/macros/s/AKfycbzFf70JZOCGNTKu8fTpCU7HRFBLv8IuFo0mp0g4QxYgZDwNp9LL0mMFI30P04PCIeM/exec?${params.toString()}`);
-                const data = await response.json();
+                const apiUrl = `https://script.google.com/macros/s/AKfycbzFf70JZOCGNTKu8fTpCU7HRFBLv8IuFo0mp0g4QxYgZDwNp9LL0mMFI30P04PCIeM/exec?${params.toString()}`;
+                // console.log('請求 URL:');
 
-                if (data.status === 'success') {
-                    if (data.data.startsWith('http')) {
-                        resultDiv.innerHTML = `
-                            <div class="alert alert-success">
-                                已找到您的收據！<br>
-                                <a href="${data.data}" target="_blank" class="btn btn-success mt-2">點此查看收據</a>
-                            </div>`;
+                const response = await fetch(apiUrl);
+                // console.log('回應狀態:', response.status);
+                
+                const data = await response.json();
+                // console.log('收到的資料:', data);
+
+                if (!data) {
+                    throw new Error('未收到資料');
+                }
+
+                if (data.status === 'success' && data.data) {
+                    if (data.data.success) {
+                        const receipts = data.data.receipts;
+                        // console.log('收據資料:', receipts);
+                        
+                        if (receipts && receipts.length > 0) {
+                            let receiptLinks = receipts.map(receipt => `
+                                <div class="mb-2">
+                                    <strong>${receipt.category}</strong><br>
+                                    <a href="${receipt.url}" target="_blank" class="btn btn-success btn-sm mt-1">
+                                        查看收據 ${receipt.receiptNo}
+                                    </a>
+                                </div>
+                            `).join('');
+                            
+                            resultDiv.innerHTML = `
+                                <div class="alert alert-success">
+                                    收據如下：<br>
+                                    <hr>
+                                    ${receiptLinks}
+                                    <hr>
+                                </div>
+                                <div class="warning-text mt-3">
+                                        <i class="bi bi-exclamation-triangle-fill"></i>
+                                        所有登入資訊皆有記錄，請勿將非本人收據資料作他用。
+                                </div>
+                                `;
+                        } else {
+                            resultDiv.innerHTML = `<div class="alert alert-warning">找不到據資料</div>`;
+                        }
                     } else {
-                        resultDiv.innerHTML = `<div class="alert alert-warning">${data.data}</div>`;
+                        resultDiv.innerHTML = `<div class="alert alert-warning">${data.data.message || '查詢失敗'}</div>`;
                     }
+                } else if (data.status === 'error') {
+                    resultDiv.innerHTML = `<div class="alert alert-danger">${data.data.message}</div>`;
                 } else {
-                    resultDiv.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+                    console.error('未預期的回應格式:', data);
+                    resultDiv.innerHTML = '<div class="alert alert-danger">系統回應格式錯誤</div>';
                 }
             } catch (error) {
-                resultDiv.innerHTML = '<div class="alert alert-danger">系統發生錯誤，請稍後再試</div>';
+                console.error('錯誤詳情:', error);
+                resultDiv.innerHTML = `<div class="alert alert-danger">系統發生錯誤：${error.message}</div>`;
             }
         }
     </script>
