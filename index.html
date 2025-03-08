@@ -3,100 +3,404 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>國立陽明交通大學校友總會 2024 跨世代交流餐會收據平台</title>
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>國立陽明交通大學校友總會2025會費繳費查詢</title>
     <style>
-        body {
-            background-color: #f8f9fa;
+        :root {
+            --primary-color: #004169;
+            --secondary-color: #dc5f00;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
         }
-        .receipt-form {
-            max-width: 600px;
-            margin: 50px auto;
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft JhengHei', 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
             padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+            margin-bottom: 2rem;
+        }
+        
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .card {
             background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 65, 105, 0.25);
+        }
+        
+        button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+        
+        button:hover {
+            background-color: #c95500;
+        }
+        
+        .result {
+            display: none;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 8px;
+            background-color: #f1f9ff;
+            border-left: 5px solid var(--primary-color);
+        }
+        
+        .result h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .result-info {
+            margin-bottom: 1rem;
+        }
+        
+        .status {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+        
+        .status-paid {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-unpaid {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-receipt-done {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-receipt-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .meeting-reminder {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: #ffe9cc;
+            border-radius: 4px;
+            border-left: 5px solid var(--secondary-color);
+        }
+        
+        .error-message {
+            display: none;
+            color: var(--danger-color);
+            background-color: #f8d7da;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+            border-left: 5px solid var(--danger-color);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 1rem 0;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 2rem;
+            height: 2rem;
+            border: 0.25rem solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 0.25rem solid var(--primary-color);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .status-message {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 4px;
+            display: none;
+            text-align: center;
+        }
+        
+        .status-message.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .footer {
+            text-align: center;
+            color: #6c757d;
+            margin-top: 2rem;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 576px) {
+            header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .card {
+                padding: 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="receipt-form">
-            <h2 class="text-center mb-4">國立陽明交通大學校友總會<br>2024跨世代交流餐會收據平台</h2>
-            
-            <div class="mb-3">
-                <label for="name" class="form-label">姓名</label>
-                <input type="text" class="form-control" id="name" placeholder="請輸入姓名">
+        <header>
+            <h1>國立陽明交通大學校友總會</h1>
+            <p>2025年度會費繳費狀態查詢系統</p>
+        </header>
+        
+        <main>
+            <div class="card">
+                <div class="status-message" id="api-status"></div>
+                
+                <div class="form-group">
+                    <label for="name">姓名</label>
+                    <input type="text" id="name" placeholder="請輸入您的姓名">
+                </div>
+                
+                <div class="form-group">
+                    <label for="id-last-5">身分證字號末五碼</label>
+                    <input type="text" id="id-last-5" placeholder="請輸入身分證字號末五碼">
+                </div>
+                
+                <button id="query-btn">查詢繳費狀態</button>
+                
+                <div class="loading" id="loading">
+                    <div class="loading-spinner"></div>
+                    <p>資料查詢中，請稍候...</p>
+                </div>
+                
+                <div id="error-message" class="error-message">
+                    查無符合資料，請確認您輸入的姓名及身分證字號末五碼是否正確。
+                </div>
             </div>
             
-            <div class="mb-3">
-                <label for="email" class="form-label">電子郵件</label>
-                <input type="email" class="form-control" id="email" placeholder="請輸入電子郵件">
+            <div id="result" class="result">
+                <h3 id="result-name"></h3>
+                
+                <div id="payment-status" class="status"></div>
+                
+                <div class="result-info">
+                    <div id="payment-info"></div>
+                    <div id="receipt-info"></div>
+                </div>
+                
+                <div class="meeting-reminder">
+                    <strong>溫馨提醒：</strong> 2025年校友總會成立大會將於 4月12日 舉行，請備妥時間參與。
+                </div>
             </div>
-
-            <div class="d-grid gap-2">
-                <button class="btn btn-primary" onclick="searchReceipt()">查看收據</button>
-            </div>
-
-            <div id="result" class="mt-3"></div>
-        </div>
+        </main>
+        
+        <footer class="footer">
+            <p>© 2025 國立陽明交通大學校友總會</p>
+        </footer>
     </div>
-
-    <!-- Bootstrap 5 JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        function isValidEmail(email) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(email);
-        }
-
-        async function searchReceipt() {
-            const name = document.getElementById('name').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const resultDiv = document.getElementById('result');
+        // 使用 Google Apps Script 作為後端服務獲取數據
+        // 您需要將 SCRIPT_URL 替換為您部署的 Apps Script 網頁應用程式 URL
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw37cQl58NKPUNyqNKdGH3Z8qRqsUSwUuj5DRWTdBIwVV-CxylbPjKfxFSG2aND9vKGGg/exec';
+        
+        // 不需要儲存所有會員資料，因為我們現在只查詢單一會員
+        
+        // 顯示狀態訊息
+        function showStatusMessage(message, isError = false) {
+            const statusElement = document.getElementById('api-status');
+            statusElement.textContent = message;
+            statusElement.style.display = 'block';
             
-            // 檢查必填欄位
-            if (!name || !email) {
-                resultDiv.innerHTML = '<div class="alert alert-danger">請填寫所有欄位</div>';
-                return;
+            if (isError) {
+                statusElement.classList.add('error');
+                statusElement.classList.remove('success');
+            } else {
+                statusElement.classList.add('success');
+                statusElement.classList.remove('error');
             }
-
-            // 檢查電子郵件格式
-            if (!isValidEmail(email)) {
-                resultDiv.innerHTML = '<div class="alert alert-danger">請輸入有效的電子郵件地址</div>';
-                return;
-            }
-
-            resultDiv.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
-
+            
+            // 5秒後自動隱藏訊息
+            setTimeout(() => {
+                statusElement.style.display = 'none';
+            }, 5000);
+        }
+        
+        // 顯示/隱藏載入中動畫
+        function toggleLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+            document.getElementById('query-btn').disabled = show;
+        }
+        
+        // 不再需要這個函數，因為我們現在只在查詢時才發送請求
+        
+        // 查詢會員繳費資料 (直接從 API 獲取單一會員資料)
+        async function queryMemberPayment(name, idLast5) {
             try {
-                const params = new URLSearchParams({
-                    name: name,
-                    email: email
-                });
-
-                const response = await fetch(`https://script.google.com/macros/s/AKfycbzFf70JZOCGNTKu8fTpCU7HRFBLv8IuFo0mp0g4QxYgZDwNp9LL0mMFI30P04PCIeM/exec?${params.toString()}`);
-                const data = await response.json();
-
-                if (data.status === 'success') {
-                    if (data.data.startsWith('http')) {
-                        resultDiv.innerHTML = `
-                            <div class="alert alert-success">
-                                已找到您的收據！<br>
-                                <a href="${data.data}" target="_blank" class="btn btn-success mt-2">點此查看收據</a>
-                            </div>`;
-                    } else {
-                        resultDiv.innerHTML = `<div class="alert alert-warning">${data.data}</div>`;
-                    }
+                // 直接發送 API 請求獲取特定會員資料
+                const response = await fetch(`${SCRIPT_URL}?name=${encodeURIComponent(name)}&idLast5=${encodeURIComponent(idLast5)}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.success && Array.isArray(result.data) && result.data.length > 0) {
+                    // 只取得第一筆符合的資料
+                    return result.data[0];
                 } else {
-                    resultDiv.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+                    return null; // 查無符合資料
                 }
             } catch (error) {
-                resultDiv.innerHTML = '<div class="alert alert-danger">系統發生錯誤，請稍後再試</div>';
+                console.error('查詢資料時出錯:', error);
+                return null;
             }
         }
+        
+        // 處理查詢按鈕點擊事件
+        document.getElementById('query-btn').addEventListener('click', async function() {
+            const name = document.getElementById('name').value.trim();
+            const idLast5 = document.getElementById('id-last-5').value.trim();
+            
+            // 清除之前的查詢結果
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('error-message').style.display = 'none';
+            
+            if (!name || !idLast5) {
+                alert('請填寫完整資訊');
+                return;
+            }
+            
+            // 顯示載入中動畫
+            toggleLoading(true);
+            
+            // 直接查詢會員資料
+            const member = await queryMemberPayment(name, idLast5);
+            
+            // 隱藏載入中動畫
+            toggleLoading(false);
+            
+            const resultElement = document.getElementById('result');
+            const errorElement = document.getElementById('error-message');
+            
+            if (member) {
+                // 顯示結果區塊
+                resultElement.style.display = 'block';
+                
+                // 設置姓名
+                document.getElementById('result-name').textContent = `${member.name} 校友`;
+                
+                // 設置繳費狀態
+                const paymentStatusElement = document.getElementById('payment-status');
+                const paymentInfoElement = document.getElementById('payment-info');
+                const receiptInfoElement = document.getElementById('receipt-info');
+                
+                if (member.paymentDate) {
+                    // 已繳費
+                    paymentStatusElement.textContent = '已繳費';
+                    paymentStatusElement.className = 'status status-paid';
+                    paymentInfoElement.innerHTML = `<p>您已於 <strong>${member.paymentDate}</strong> 透過 <strong>${member.paymentMethod}</strong> 完成會費繳納。</p>`;
+                    
+                    // 收據狀態
+                    if (member.receiptMade) {
+                        receiptInfoElement.innerHTML = '<p><span class="status status-receipt-done">收據已製作寄發</span></p><p>您的收據已經製作完成，請至電子郵件查收。</p>';
+                    } else {
+                        receiptInfoElement.innerHTML = '<p><span class="status status-receipt-pending">收據製作中</span></p><p>您的收據正在製作中，尚未完成。如有急需，請聯繫校友會辦公室。</p>';
+                    }
+                } else {
+                    // 未繳費
+                    paymentStatusElement.textContent = '尚未繳費';
+                    paymentStatusElement.className = 'status status-unpaid';
+                    paymentInfoElement.innerHTML = '<p>我們尚未收到您的會費繳納紀錄。</p><p>請參考以下繳費資訊：<br>銀行：國泰世華銀行<br>帳號：123-456-789<br>戶名：國立陽明交通大學校友總會</p>';
+                    receiptInfoElement.innerHTML = '';
+                }
+            } else {
+                // 查無資料
+                errorElement.style.display = 'block';
+            }
+        });
+        
+        // 不再需要頁面載入時獲取資料，只在用戶查詢時才發送請求
     </script>
 </body>
-</html> 
+</html>
